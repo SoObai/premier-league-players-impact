@@ -27,7 +27,7 @@ An interactive data visualization project showcasing Premier League player stati
 
 ## Live Demo
 
-Visit the live application: [Premier League Players Impact](https://your-username.github.io/premier-league-players-impact/)
+Visit the live application: [Premier League Players Impact](https://soobai.github.io/premier-league-players-impact/)
 
 ## Data Source
 
