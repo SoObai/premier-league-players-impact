@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            background-color: lightgrey;
+        }
+
+        .dot {
+            fill: steelblue;
+        }
+
+        .axis-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .chart-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        var margin = { top: 60, right: 20, bottom: 60, left: 60 };
+        var width = 1000 - margin.left - margin.right;
+        var height = 500 - margin.top - margin.bottom;
+
+        var x = d3.scaleLinear().range([0, width]);
+        var y = d3.scaleLinear().range([height, 10]);
+
+        var svg = d3
+            .select("body")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("data.csv").then(function (data) {
+            data.forEach(function (d) {
+                d.Goals = +d.Goals;
+                d.Penalties = +d.Penalties;
+            });
+
+            x.domain(d3.extent(data, function (d) { return d.Goals; }));
+            y.domain([0, d3.max(data, function (d) { return d.Penalties; })]);
+
+            svg.selectAll("dot")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("r", 0) // Initial radius set to 0
+                .attr("cx", function (d) { return x(d.Goals); })
+                .attr("cy", function (d) { return y(d.Penalties); })
+                .attr("class", "dot")
+                .transition() // Apply transition
+                .duration(1000) // Transition duration in milliseconds
+                .attr("r", 5); // Final radius set to 5
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+
+            svg.append("g").call(d3.axisLeft(y));
+
+            svg.append("text")
+                .attr("transform", "translate(" + width / 2 + "," + (height + margin.top - 10) + ")")
+                .style("text-anchor", "middle")
+                .text("Goals")
+                .attr("class", "axis-title");
+
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left)
+                .attr("x", 0 - height / 2)
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text("Penalties")
+                .attr("class", "axis-title");
+
+            svg.append("text")
+                .attr("transform", "translate(" + width / 2 + "," + -margin.top / 2 + ")")
+                .style("text-anchor", "middle")
+                .text("Goals vs Penalties")
+                .attr("class", "chart-title");
+        });
+    </script>
+</body>
+
+</html>

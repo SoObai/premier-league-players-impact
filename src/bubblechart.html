@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            background-image: url('image3.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+        }
+
+        .chart-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+
+        .colored-box {
+            background-color: #E3E9E8;
+            width: 800px;
+            border-radius: 25px;
+            margin: 3vh auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .p{
+            font-size: 20px;
+            font-weight: bold;
+            color: rgb(255, 255, 255);
+            justify-content: center;
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="colored-box">
+        <h1> Bubble Chart of Total Goals and Total Cards by Team</h1>
+    </div>
+        <p class="p"> The Bubble size represents number of goals and the color represents the nuber of the Cards.
+        </p>
+    
+    <script>
+        var svg = d3.select("body").append("svg")
+            .attr("width", 1500)
+            .attr("height", 600);
+
+        var margin = {
+                top: 20,
+                right: 20,
+                bottom: 30,
+                left: 40
+            },
+            width = +svg.attr("width") - margin.left - margin.right,
+            height = +svg.attr("height") - margin.top - margin.bottom;
+
+        var x = d3.scaleLinear()
+            .range([0, width]);
+
+        var color = d3.scaleSequential(d3.interpolateYlOrRd);
+
+        d3.csv("data.csv").then(function(data) {
+            var groupedData = Array.from(d3.group(data, d => d.Team),
+                ([key, value]) => ({
+                    key,
+                    value
+                }));
+
+            groupedData.forEach(function(d) {
+                d.totalGoals = d3.sum(d.value, function(e) {
+                    return +e.Goals;
+                });
+                d.totalCards = d3.sum(d.value, function(e) {
+                    return +e.YellowCards + +e.RedCards;
+                });
+            });
+
+            x.domain([0, d3.max(groupedData, function(d) {
+                return d.totalGoals;
+            })]);
+
+            var maxTotalCards = d3.max(groupedData, function(d) {
+                return d.totalCards;
+            });
+            color.domain([0, maxTotalCards]);
+
+            var simulation = d3.forceSimulation(groupedData)
+                .force("x", d3.forceX(width / 2).strength(0.1))
+                .force("y", d3.forceY(height / 2).strength(0.1))
+                .force("collide", d3.forceCollide().radius(function(d) {
+                    return Math.sqrt(d.totalGoals) * 5 + 10;
+                }))
+                .stop();
+
+            for (var i = 0; i < 120; ++i) {
+                simulation.tick();
+            }
+
+            var node = svg.append("g")
+                .selectAll(".node")
+                .data(groupedData)
+                .enter().append("g")
+                .attr("class", "node");
+
+            node.append("circle")
+                .attr("r", function(d) {
+                    return Math.sqrt(d.totalGoals) * 5;
+                })
+                .style("fill", function(d) {
+                    return color(d.totalCards);
+                })
+                .append("title")
+                .text(function(d) {
+                    return d.key + "\nTotal Goals: " + d.totalGoals + "\nTotal Cards: " + d.totalCards;
+                });
+
+            var padding = 1; // Padding between bubbles
+
+            node.attr("transform", function(d) {
+                var randomX = Math.random() * (width - 2 * Math.sqrt(d.totalGoals) * 5) + Math.sqrt(d.totalGoals) * 5;
+                var randomY = Math.random() * (height - 2 * Math.sqrt(d.totalGoals) * 5) + Math.sqrt(d.totalGoals) * 5;
+                return "translate(" + randomX + "," + randomY + ")";
+            });
+
+            // Adjust bubbles to avoid overlap
+            simulation.force("collide", d3.forceCollide().radius(function(d) {
+                return Math.sqrt(d.totalGoals) * 10 + padding ;
+            }));
+
+            simulation.alpha(1).restart();
+
+            node.transition()
+                .duration(1500) // Duration in milliseconds
+                .attr("transform", function(d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                });
+
+            node.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", ".3em")
+                .text(function(d) {
+                    return d.key;
+                });
+
+            svg.append("text")
+                .attr("x", (width / 2))
+                .attr("y", 30)
+                .attr("text-anchor", "middle")
+                .style("font-size", "20px")
+                .attr("class", "chart-title");
+        });
+    </script>
+</body>
+
+</html>
