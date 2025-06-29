@@ -22,7 +22,7 @@ An interactive data visualization project showcasing Premier League player stati
 ## How to Use
 
 1. Clone this repository
-2. Open `src/index.html` in your web browser
+2. Open `index.html` in your web browser
 3. Click on any visualization button to explore the data
 
 ## Live Demo
@@ -31,7 +31,7 @@ Visit the live application: [Premier League Players Impact](https://soobai.githu
 
 ## Data Source
 
-The project uses Premier League player statistics data stored in `src/data.csv`.
+The project uses Premier League player statistics data stored in `data.csv`.
 
 ## License
 

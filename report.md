@@ -22,6 +22,8 @@ Originally proposed using World Bank data, the project evolved to use a football
 - Yellow Cards
 - Red Cards
 
+The data is now located in `data.csv` in the project root.
+
 ---
 
 ## 📊 Visualizations Breakdown
